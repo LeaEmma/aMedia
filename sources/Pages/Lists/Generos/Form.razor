@@ -1,0 +1,73 @@
+﻿@page "/generos/form"
+@page "/generos/form/{Id:int}"
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>@accion Género</h3>
+<EditForm Model="@oGeneros" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <fieldset>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Nombre</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oGeneros.txt_desc"></InputText>
+                <ValidationMessage For="() => oGeneros.txt_desc" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-primary btn-block" @onclick="Save"> Guardar </button>
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-danger btn-block" @onclick="Cancelar"> Cancelar </button>
+            </div>
+        </div>
+    </fieldset>
+</EditForm>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string accion { get; set; }
+
+    tGenero oGeneros = new tGenero();
+
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tGenero> oRespuestaUsers = new Respuesta<tGenero>();
+    public string Url = "/api/generos";
+
+    private void Cancelar() => NavigationManager.NavigateTo("/generos");
+
+    private async Task Save()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.PutAsJsonAsync<tGenero>(Url, oGeneros);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+        else
+        {
+            var response = await Http.PostAsJsonAsync<tGenero>(Url, oGeneros);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+            NavigationManager.NavigateTo("/generos");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tGenero>>(Url + "/" + Id);
+            oGeneros = oRespuestaUsers.Data;
+            accion = "Editar";
+        }
+        else
+        {
+            accion = "Nuevo";
+        }
+    }
+    private void HandleValidSubmit()
+    {
+    }
+}

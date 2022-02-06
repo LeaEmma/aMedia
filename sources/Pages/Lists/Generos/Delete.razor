@@ -1,0 +1,47 @@
+﻿@page "/generos/delete/{Id:int}"
+@using Data
+@using Data.Response
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Eliminar géneros</h3>
+
+<p>¿Deseas eliminar el género: <b>@Nombre</b>?</p>
+
+<div class="row">
+    <div class="col-sm-12">
+        <button href="" class="btn btn-secondary" @onclick="Cancelar">No</button>
+        <button href="" class="btn btn-warning" @onclick="Eliminar">Sí</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string Nombre { get; set; }
+    tGenero oGenero = new tGenero();
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tGenero> oRespuestaUsers = new Respuesta<tGenero>();
+    public string Url = "/api/generos";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tGenero>>(Url + "/" + Id);
+            oGenero = oRespuestaUsers.Data;
+
+            Nombre = oGenero.txt_desc;
+        }
+    }
+    private void Cancelar() => NavigationManager.NavigateTo("/generos");
+    private async Task Eliminar()
+    {
+        var response = await Http.DeleteAsync(Url + "/" + Id);
+        oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+
+            NavigationManager.NavigateTo("/generos");
+    }
+}

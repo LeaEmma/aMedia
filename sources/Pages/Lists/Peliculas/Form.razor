@@ -1,0 +1,101 @@
+﻿@page "/peliculas/form"
+@page "/peliculas/form/{Id:int}"
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>@accion películas</h3>
+<EditForm Model="@oPelicula" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <fieldset>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Nombre</label>
+                <InputText id="txtNombre" class="form-control" @bind-Value="oPelicula.txt_desc"></InputText>
+                <ValidationMessage For="() => oPelicula.txt_desc" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Cantidad disponible alquiler</label>
+                <InputNumber id="txtCantAlquiler" class="form-control" @bind-Value="oPelicula.cant_disponibles_alquiler"></InputNumber>
+                <ValidationMessage For="() => oPelicula.cant_disponibles_alquiler" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Cantidad disponible venta</label>
+                <InputNumber id="txtCantVenta" class="form-control" @bind-Value="oPelicula.cant_disponibles_venta"></InputNumber>
+                <ValidationMessage For="() => oPelicula.cant_disponibles_venta" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Precio alquiler</label>
+                <InputNumber id="txtPrecioAlquiler" class="form-control" @bind-Value="oPelicula.precio_alquiler"></InputNumber>
+                <ValidationMessage For="() => oPelicula.precio_alquiler" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Precio venta</label>
+                <InputNumber id="txtPrecioVenta" class="form-control" @bind-Value="oPelicula.precio_venta"></InputNumber>
+                <ValidationMessage For="() => oPelicula.precio_venta" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-primary btn-block" @onclick="Save"> Guardar </button>
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-danger btn-block" @onclick="Cancelar"> Cancelar </button>
+            </div>
+        </div>
+    </fieldset>
+</EditForm>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string accion { get; set; }
+
+    tPelicula oPelicula = new tPelicula();
+
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tPelicula> oRespuestaUsers = new Respuesta<tPelicula>();
+    public string Url = "/api/peliculas";
+
+    private void Cancelar() => NavigationManager.NavigateTo("/peliculas");
+
+    private async Task Save()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.PutAsJsonAsync<tPelicula>(Url, oPelicula);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+        else
+        {
+            var response = await Http.PostAsJsonAsync<tPelicula>(Url, oPelicula);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+            NavigationManager.NavigateTo("/peliculas");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tPelicula>>(Url + "/" + Id);
+            oPelicula = oRespuestaUsers.Data;
+            accion = "Editar";
+        }
+        else
+        {
+            accion = "Nueva";
+        }
+    }
+    private void HandleValidSubmit()
+    {
+    }
+}

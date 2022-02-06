@@ -1,0 +1,115 @@
+﻿@page "/usuarios/form"
+@page "/usuarios/form/{Id:int}"
+
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>@accion Usuario</h3>
+<EditForm Model="@oUsers" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <fieldset>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Apellido</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oUsers.txt_apellido"></InputText>
+                <ValidationMessage For="() => oUsers.txt_apellido" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Nombre</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oUsers.txt_nombre"></InputText>
+                <ValidationMessage For="() => oUsers.txt_nombre" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Usuario</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oUsers.txt_user"></InputText>
+                <ValidationMessage For="() => oUsers.txt_user" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Contraseña</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oUsers.txt_password"></InputText>
+                <ValidationMessage For="() => oUsers.txt_password" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Documento</label>
+                <InputText id="txtNombreUsers" class="form-control" @bind-Value="oUsers.nro_doc"></InputText>
+                <ValidationMessage For="() => oUsers.nro_doc" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Rol</label>
+                <InputNumber id="txtNombreUsers" class="form-control" @bind-Value="oUsers.cod_rol"></InputNumber>
+                <ValidationMessage For="() => oUsers.cod_rol" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 form-group item-form">
+                <label for="nombre">Activo</label>
+                <InputNumber id="txtNombreUsers" class="form-control" @bind-Value="oUsers.sn_activo"></InputNumber>
+                <ValidationMessage For="() => oUsers.sn_activo" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-primary btn-block" @onclick="Save"> Guardar </button>
+            </div>
+            <div class="col-sm-6 col-md-2">
+                <button class="btn btn-danger btn-block" @onclick="Cancelar"> Cancelar </button>
+            </div>
+        </div>
+    </fieldset>
+</EditForm>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string accion { get; set; }
+
+    tUsers oUsers = new tUsers();
+
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tUsers> oRespuestaUsers = new Respuesta<tUsers>();
+    public string Url = "/api/usuarios";
+
+    private void Cancelar() => NavigationManager.NavigateTo("/usuarios");
+    
+    private async Task Save()
+    {
+        if (Id != 0)
+        {
+            var response = await Http.PutAsJsonAsync<tUsers>(Url, oUsers);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+        else
+        {
+            var response = await Http.PostAsJsonAsync<tUsers>(Url, oUsers);
+            oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+        }
+            NavigationManager.NavigateTo("/usuarios");
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tUsers>>(Url + "/" + Id);
+            oUsers = oRespuestaUsers.Data;
+            accion = "Editar";
+        }
+        else
+        {
+            accion = "Nuevo";
+        }
+    }
+    private void HandleValidSubmit()
+    {
+    }
+}

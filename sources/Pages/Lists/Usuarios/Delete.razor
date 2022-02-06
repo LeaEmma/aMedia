@@ -1,0 +1,50 @@
+﻿@page "/usuarios/delete/{Id:int}"
+@using Data
+@using Data.Response
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Eliminar usuarios</h3>
+
+<p>¿Deseas eliminar al usuario: <b>@Apellido, @Nombre</b>?</p>
+
+<div class="row">
+    <div class="col-sm-12">
+        <button href="" class="btn btn-secondary" @onclick="Cancelar">No</button>
+        <button href="" class="btn btn-warning" @onclick="Eliminar">Sí</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string Nombre { get; set; }
+    public string Apellido { get; set; }
+    tUsers oPersona = new tUsers();
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tUsers> oRespuestaUsers = new Respuesta<tUsers>();
+    public string Url = "/api/usuarios";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tUsers>>(Url + "/" + Id);
+            oPersona = oRespuestaUsers.Data;
+
+            Nombre = oPersona.txt_nombre;
+            Apellido = oPersona.txt_apellido;
+        }
+    }
+    private void Cancelar() => NavigationManager.NavigateTo("/usuarios");
+    private async Task Eliminar()
+    {
+        var response = await Http.DeleteAsync(Url + "/" + Id);
+        oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+
+
+            NavigationManager.NavigateTo("/usuarios");
+    }
+}

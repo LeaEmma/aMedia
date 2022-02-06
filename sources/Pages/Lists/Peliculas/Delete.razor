@@ -1,0 +1,47 @@
+﻿@page "/peliculas/delete/{Id:int}"
+@using Data
+@using Data.Response
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<h3>Eliminar película</h3>
+
+<p>¿Deseas eliminar la película: <b>@@Nombre</b>?</p>
+
+<div class="row">
+    <div class="col-sm-12">
+        <button href="" class="btn btn-secondary" @onclick="Cancelar">No</button>
+        <button href="" class="btn btn-warning" @onclick="Eliminar">Sí</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    public string Nombre { get; set; }
+    tPelicula oPelicula = new tPelicula();
+    Respuesta<Object> oRespuesta = new Respuesta<Object>();
+    Respuesta<tPelicula> oRespuestaUsers = new Respuesta<tPelicula>();
+    public string Url = "/api/peliculas";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+        {
+            oRespuestaUsers = await Http.GetFromJsonAsync<Respuesta<tPelicula>>(Url + "/" + Id);
+            oPelicula = oRespuestaUsers.Data;
+
+            Nombre = oPelicula.txt_desc;
+        }
+    }
+    private void Cancelar() => NavigationManager.NavigateTo("/peliculas");
+    private async Task Eliminar()
+    {
+        var response = await Http.DeleteAsync(Url + "/" + Id);
+        oRespuesta = response.Content.ReadFromJsonAsync<Respuesta<Object>>().Result;
+
+            NavigationManager.NavigateTo("/peliculas");
+    }
+}

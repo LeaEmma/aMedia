@@ -1,0 +1,87 @@
+﻿@page "/usuarios"
+
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Data
+@using Data.Response
+
+@inject HttpClient Http
+
+<h3>Usuarios</h3>
+
+<div class="row">
+    <div class="col-2 text-left">
+        <a type="button" class="btn btn-primary" href="usuarios/form">Nuevo</a>
+    </div>
+</div>
+
+<table class="table tabla-condensed table-striped dataTable no-footer" id="ponchoTable" aria-describedby="ponchoTable_info" role="grid">
+    <thead>
+        <tr role="row">
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>User</th>
+            <th>Password</th>
+            <th>Documento</th>
+            <th>Rol</th>
+            <th>Activo</th>
+
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (oRespuesta.Data == null && oRespuesta.Exito == 0)
+        {
+            <tr role="row" class="odd">
+                <td class="sorting_1" colspan="5">
+                    <p>Cargando...</p>
+                </td>
+            </tr>
+        }
+        @if (oRespuesta != null && oRespuesta.Data != null)
+        {
+            @foreach (var oElement in oRespuesta.Data)
+            {
+    <tr role="row" class="odd">
+        <td class="" data-title="Apellido">
+            <p>@oElement.txt_apellido</p>
+        </td>
+        <td class="" data-title="Nombre">
+            <p>@oElement.txt_nombre</p>
+        </td>
+
+        <td class="" data-title="User">
+            <p>@oElement.txt_user</p>
+        </td>
+        <td class="" data-title="Password">
+            <p>@oElement.txt_password</p>
+        </td>
+        <td class="" data-title="Documento">
+            <p>@oElement.nro_doc</p>
+        </td>
+        <td class="" data-title="Rol">
+            <p>@oElement.cod_rol</p>
+        </td>
+        <td class="" data-title="Activo">
+            <p>@oElement.sn_activo</p>
+        </td>
+        <td>
+            <a href="/Usuarios/form/@oElement.cod_usuario"><i class="fa fa-edit"> Editar</i></a>
+        </td>
+        <td>
+            <a href="/Usuarios/delete/@oElement.cod_usuario"><i class="fa fa-trash"> Eliminar</i></a>
+        </td>
+    </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    public string Url = "/api/usuarios";
+    public Respuesta<List<tUsers>> oRespuesta = new Respuesta<List<tUsers>>();
+
+    protected override async Task OnInitializedAsync() =>
+        oRespuesta = await Http.GetFromJsonAsync<Respuesta<List<tUsers>>>(Url);
+}
